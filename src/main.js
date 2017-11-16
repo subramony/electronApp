@@ -7,9 +7,12 @@ const countDown = require('./countdown.js');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const ipc =  electron.ipcMain;
+const menu  = electron.Menu;
 
 let mainWindow;
 let windows = [];
+
+
 
 app.on('ready', function () {
     [1,2,3].forEach(function () {
