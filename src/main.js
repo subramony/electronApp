@@ -7,33 +7,31 @@ const countDown = require('./countdown.js');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const ipc =  electron.ipcMain;
+const globalShortcut=  electron.globalShortcut;
 
 let mainWindow;
-let windows = [];
 
 app.on('ready', function () {
-    [1,2,3].forEach(function () {
-        let win  = new BrowserWindow({
-            height: 400,
-            width : 400
-        });
 
-        win.loadURL(`file://${__dirname}/views/countdown.html`);
+    mainWindow  = new BrowserWindow({
+        height: 400,
+        width : 400
+    });
 
-        win.on('close', () => {
-          console.log('closed');
-        })
+    mainWindow.loadURL(`file://${__dirname}/views/countdown.html`);
 
-        windows.push(win);
+    mainWindow.on('close', () => {
+      console.log('closed');
     })
+
+    globalShortcut.register('Ctrl+Alt+Cmd+D', function () {
+        mainWindow.webContents.send('capture', app.getPath('pictures'));
+    });
 });
 
 ipc.on('countdown-start', function () {
     countDown(function (count) {
-
-        windows.forEach(function(win) {
-            win.webContents.send('countdown', count);
-        });
+        mainWindow.webContents.send('countdown', count);
     });
 });
 
