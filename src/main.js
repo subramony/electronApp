@@ -7,36 +7,58 @@ const countDown = require('./countdown.js');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const ipc =  electron.ipcMain;
-const menu  = electron.Menu;
+const Menu  = electron.Menu;
 
 let mainWindow;
-let windows = [];
-
-
 
 app.on('ready', function () {
-    [1,2,3].forEach(function () {
-        let win  = new BrowserWindow({
-            height: 400,
-            width : 400
-        });
 
-        win.loadURL(`file://${__dirname}/views/countdown.html`);
+    const name = electron.app.getName()
 
-        win.on('close', () => {
+    const template = [
+        {
+            label : name,
+            submenu : [
+            {
+                label: `About ${name}`,
+                click: () => {
+                    console.log('clicked the application');
+                },
+                role : 'about'
+            },
+            {
+                type : 'separator'
+            },
+            {
+                label : 'Quit',
+                click : () => {
+                    app.quit()
+                },
+                accelerator : 'Cmd+Q'
+            }
+            ]
+        }
+    ]
+
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+
+    mainWindow  = new BrowserWindow({
+        height: 400,
+        width : 400
+    });
+
+    mainWindow.loadURL(`file://${__dirname}/views/countdown.html`);
+
+    mainWindow.on('close', () => {
           console.log('closed');
-        })
-
-        windows.push(win);
     })
+
 });
 
 ipc.on('countdown-start', function () {
     countDown(function (count) {
-
-        windows.forEach(function(win) {
-            win.webContents.send('countdown', count);
-        });
+        mainWindow.webContents.send('countdown', count);
     });
 });
 
